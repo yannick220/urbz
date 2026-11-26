@@ -488,6 +488,25 @@ html,body,button,input,select{font-family:'Fredoka','Montserrat Alternates',sans
 #clouds i{position:absolute;left:-60%;width:55%;height:74px;border-radius:50%;background:radial-gradient(closest-side,#fff 0,#ffffffbb 55%,#fff0 100%);opacity:.55;filter:blur(2px);animation:cloud 46s linear infinite}
 #clouds i:nth-child(1){top:16%}#clouds i:nth-child(2){top:41%;animation-delay:-14s;animation-duration:58s}#clouds i:nth-child(3){top:64%;animation-delay:-28s}#clouds i:nth-child(4){top:82%;animation-delay:-40s;animation-duration:64s}
 @keyframes cloud{to{transform:translateX(480%)}}
+#legend i{border:2px solid var(--ol)}
+/* ===== Île flottante / marqueurs / XP / bouton lumineux ===== */
+.mk{position:absolute;border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;cursor:pointer;animation:bob 2.4s ease-in-out infinite;filter:drop-shadow(0 6px 0 #2a146655)}
+.mk.unk .q{display:grid;place-items:center;width:46px;height:52px;background:#1B2B57;border:3px solid #fff;border-radius:16px 16px 16px 16px;color:#fff;font:400 28px 'Lilita One',sans-serif;text-shadow:0 2px 0 #0008}
+.mk.unk .q:after{content:'';position:absolute;bottom:-9px;border:9px solid transparent;border-top-color:#fff;border-bottom:0}
+.mk.own{flex-direction:row;gap:6px;align-items:center;background:#fff;border:3px solid var(--ol);border-radius:999px;padding:3px 12px 3px 3px;box-shadow:0 4px 0 var(--ol)}
+.mk.own .coin{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF1A8,#FFB000);border:2px solid var(--ol);display:grid;place-items:center;font:400 13px 'Lilita One';color:var(--ol)}
+.mk.own b{font:400 14px 'Lilita One',sans-serif;color:var(--ol);white-space:nowrap}
+.mk.sel{animation:bob 1s ease-in-out infinite;transform:scale(1.2)}
+@keyframes bob{0%,100%{translate:0 0}50%{translate:0 -7px}}
+.xp{display:flex;align-items:center;gap:6px;width:150px}
+.xp em{font:400 12px 'Lilita One';font-style:normal;color:#fff;background:var(--ol);border-radius:999px;padding:2px 9px;white-space:nowrap}
+.xp span{flex:1;height:12px;background:#2a146699;border:2px solid var(--ol);border-radius:999px;overflow:hidden}
+.xp u{display:block;height:100%;background:linear-gradient(180deg,#9BFF6B,#2ED84F);border-radius:999px;transition:width .6s cubic-bezier(.34,1.56,.5,1)}
+.stars{color:#FFD43B;font-size:17px;letter-spacing:2px;text-shadow:0 2px 0 var(--ol);margin-top:2px;display:block}
+.building-trade{position:relative;overflow:visible}
+.building-trade:after{content:'';position:absolute;inset:-9px;border-radius:30px;border:4px solid #FFE066;opacity:0;animation:ring 1.7s ease-out infinite;pointer-events:none}
+@keyframes ring{0%{transform:scale(.94);opacity:.95}100%{transform:scale(1.07);opacity:0}}
+body,#phone{background:#1E9CF2!important}
 </style><link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet"></head><body><main id="phone"><div id="map" aria-label="Carte 3D interactive des bâtiments"></div>
 <header class="topbar"><button id="openProfile" class="profilepic" aria-label="Mon profil"><span id="avatarInitial">UR</span><img id="avatarImage" alt="" hidden></button><div class="top-title" aria-hidden="true"></div><div class="top-right"><button id="openSearch" class="circ" title="Rechercher un bâtiment" aria-label="Rechercher un bâtiment"><span class="material-symbols-rounded">search</span></button></div></header>
 <div class="righttools"><button id="openMarket" class="circ" title="Place de marché" aria-label="Place de marché"><span class="material-symbols-rounded">monitoring</span></button><button id="openRanking" class="circ" title="Classement général" aria-label="Classement général"><span class="material-symbols-rounded">emoji_events</span></button><button id="toggleMarketView" class="circ" title="Vue marché" aria-label="Vue marché"><span class="material-symbols-rounded">view_in_ar</span></button><button id="openWallet" class="circ" title="Mes biens" aria-label="Mes biens"><span class="material-symbols-rounded">account_balance_wallet</span></button></div>
@@ -547,27 +566,46 @@ const map=new maplibregl.Map({container:'map',style,center:DEMO_CENTER,zoom:16.9
 map.touchZoomRotate.enableRotation();window.addEventListener('resize',()=>map.resize());map.on('error',e=>console.warn('URBZ / MapLibre',e.error||e));
 
 // ===== Style « jouet animé » : rebonds, confettis, pulsation des bâtiments détenus =====
-const GROUP_CAT=new Map(),TOY_TINT=['match',['get','cat'],'loisirs','#FFC736','services','#FF6B8A','public','#A585FF','#4CC3FF'],bouncing=new Set();
+const GROUP_CAT=new Map(),TOY_TINT=['case',['==',['get','mon'],1],'#FFC736','#FFF1DC'],bouncing=new Set();
 function popBuilding(id,amp=.3){if(!id||bouncing.has(id)||!map.getSource(FULL))return;bouncing.add(id);const t0=performance.now();
  const step=now=>{const t=Math.max(0,(now-t0)/1000);if(t<1){try{map.setFeatureState({source:FULL,id},{bounce:amp*Math.exp(-5*t)*Math.sin(15*t)})}catch{}requestAnimationFrame(step)}else{try{map.setFeatureState({source:FULL,id},{bounce:0})}catch{}bouncing.delete(id)}};requestAnimationFrame(step)}
 function confetti(){const c=['#FF7A90','#4FC3F7','#FFC93C','#9B8CFF','#6EE7A8'];for(let i=0;i<46;i++){const d=document.createElement('i'),a=Math.random()*Math.PI*2,r=120+Math.random()*220;
  d.style.cssText='position:fixed;z-index:99;left:50%;top:55%;pointer-events:none;width:'+(8+Math.random()*8)+'px;height:'+(10+Math.random()*10)+'px;background:'+c[i%5]+';border-radius:'+(Math.random()<.5?'50%':'3px')+';--x:'+Math.cos(a)*r+'px;--y:'+(Math.sin(a)*r-120)+'px;animation:cf '+(1+Math.random()*.8)+'s cubic-bezier(.2,.8,.3,1) forwards';
  document.body.appendChild(d);setTimeout(()=>d.remove(),2000)}}
 document.addEventListener('click',e=>{if(e.target.closest('#tradeBtn.blue'))setTimeout(()=>{if(selectedId&&economy.owned[selectedId]){confetti();popBuilding(selectedId,.7)}},60)});
+
+// ===== Marqueurs flottants (comme les "?" de la carte de l'île) =====
+const markers=new Map();
+function refreshMarkers(){
+ if(!map.loaded||!buildings||!buildings.size)return;
+ for(const [id,group] of buildings){
+  const kind=knownKind(id);if(!kind)continue;
+  const own=!!economy.owned[id];let m=markers.get(id);
+  if(!m){const p=buildingMidpoint(group);if(!p)continue;
+   const el=document.createElement('button');el.className='mk';el.setAttribute('aria-label',kindName(id));
+   el.addEventListener('click',e=>{e.stopPropagation();setSelected(id)});
+   const marker=new maplibregl.Marker({element:el,anchor:'bottom',offset:[0,-34]}).setLngLat(p).addTo(map);
+   m={marker,el,sig:''};markers.set(id,m)}
+  const sig=own+'|'+(selectedId===id);
+  if(m.sig!==sig){m.sig=sig;m.el.className='mk '+(own?'own':'unk')+(selectedId===id?' sel':'');
+   m.el.innerHTML=own?'<span class="coin">ε</span><b>'+escapeHTML(kindName(id))+'</b>':'<span class="q">?</span>'}
+ }
+ for(const [id,m] of markers)if(!buildings.has(id)){m.marker.remove();markers.delete(id)}
+}
 let marketMode=false,curMix=0;
-const MARKET_RAMP=['interpolate',['linear'],['coalesce',['get','market_h'],6],6,'#eef2f6',50,'#a9d9c0',120,'#e9c46a',200,'#e76f51'];
+const MARKET_RAMP=['interpolate',['linear'],['coalesce',['get','mkt'],6],6,'#eef2f6',50,'#a9d9c0',120,'#e9c46a',200,'#e76f51'];
 function marketHeight(v){return Math.min(200,6+38*Math.log(1+v/3000))}
 function setMix(t){map.setPaintProperty(FULL_LAYER,'fill-extrusion-height',['max',2,['*',['+',['*',['coalesce',['get','visual_height'],18],1-t],['*',['coalesce',['get','market_h'],18],t]],['+',1,['coalesce',['feature-state','bounce'],0]]]])}
 function animateMix(to){const from=curMix,t0=performance.now();const step=now=>{const p=Math.min(1,(now-t0)/1100);curMix=from+(to-from)*(1+2.2*Math.pow(p-1,3)+1.2*Math.pow(p-1,2));if(map.getLayer(FULL_LAYER))setMix(curMix);if(p<1)requestAnimationFrame(step)};requestAnimationFrame(step)}
-function renderLegend(){const el=$('legend');if(!el)return;el.innerHTML=marketMode?'<b>Vue marché</b><div class="lgbar"></div><div class="lgrow"><span>valeur basse</span><span>élevée</span></div>':[['Loisirs & Culture','#FFC736'],['Commerces & Services','#FF6B8A'],['Équip. publics','#A585FF'],['Habitat & autres','#4CC3FF']].map(([n,c])=>'<div class="lgrow"><i style="background:'+c+'"></i>'+n+'</div>').join('')}
+function renderLegend(){const el=$('legend');if(!el)return;el.innerHTML=marketMode?'<b>Vue marché</b><div class="lgbar"></div><div class="lgrow"><span>valeur basse</span><span>élevée</span></div>':[['Monument à acheter','#FFC736'],['Autre bâtiment','#FFF1DC'],['Mon bâtiment','#2ED84F'],['Sélectionné','#FF3B6B']].map(([n,c])=>'<div class="lgrow"><i style="background:'+c+'"></i>'+n+'</div>').join('')}
 function toggleMarketView(){marketMode=!marketMode;useCurrentBuildings();paint();animateMix(marketMode?1:0);renderLegend();$('toggleMarketView')?.classList.toggle('on',marketMode);toast(marketMode?'Vue marché : la hauteur reflète la valeur.':'Vue normale : hauteurs réelles.',3);map.easeTo({pitch:marketMode?66:58,duration:1100})}
 function paint(){
  if(!map.getLayer(FULL_LAYER))return;
  const expr=['match',['get','ekoa_id']];
- if(showMyBuildings){
-  for(const id of Object.keys(economy.owned)){if(id!==selectedId)expr.push(id,CATEGORIES[categoryOf(id)].color)}
+ if(true){
+  for(const id of Object.keys(economy.owned)){if(id!==selectedId)expr.push(id,'#2ED84F')}
  }
- if(selectedId){expr.push(selectedId,CATEGORIES[categoryOf(selectedId)].color)}
+ if(selectedId){expr.push(selectedId,'#FF3B6B')}
  expr.push(marketMode?MARKET_RAMP:TOY_TINT);
  map.setPaintProperty(FULL_LAYER,'fill-extrusion-color',expr.length===3?expr[2]:expr);
 }
@@ -887,15 +925,16 @@ function useCurrentBuildings(){
  rememberNamedPositions();
  {const votes=new Map();for(const f of connected.features){const g=f.properties.ekoa_id,c=f.properties.osm_category;if(c&&c!=='unclassified'){const m=votes.get(g)||{};m[c]=(m[c]||0)+1;votes.set(g,m)}}
  for(const [g,m] of votes)GROUP_CAT.set(g,Object.entries(m).sort((a,b)=>b[1]-a[1])[0][0]);
- for(const f of connected.features)f.properties.cat=categoryOf(f.properties.ekoa_id)}
- for(const f of connected.features)f.properties.market_h=marketHeight(currentValue(f.properties.ekoa_id));
+ for(const f of connected.features){f.properties.cat=categoryOf(f.properties.ekoa_id);f.properties.mon=knownKind(f.properties.ekoa_id)?1:0}}
+ {const gmax=new Map();for(const f of connected.features){const g=f.properties.ekoa_id,h=f.properties.visual_height||18;gmax.set(g,Math.max(gmax.get(g)||0,h))}
+ for(const f of connected.features){const g=f.properties.ekoa_id,top=marketHeight(currentValue(g)),k=top/(gmax.get(g)||18);f.properties.mkt=top;f.properties.market_h=(f.properties.visual_height||18)*k}}
  map.getSource(FULL).setData({type:'FeatureCollection',features:connected.features});
  if(map.getZoom()>=15.5){
   map.setLayoutProperty(FULL_LAYER,'visibility','visible');
   map.setLayoutProperty('tile-volumes','visibility','none');
   map.setLayoutProperty('tile-outline','visibility','none');
  }
- ready=true;paint();
+ ready=true;paint();refreshMarkers();
  if(view==='building'&&selectedId&&!buildings.has(selectedId)){
    // Une connexion avec un bâtiment voisin peut changer l'ID du groupe.
    // On évite une couleur erronée en réinitialisant la fiche uniquement ici.
@@ -980,6 +1019,15 @@ function setArea(c){
 map.on('load',()=>{
  map.addSource(FULL,{type:'geojson',data:EMPTY,promoteId:'ekoa_id'});
  map.addLayer({id:FULL_LAYER,type:'fill-extrusion',source:FULL,layout:{visibility:'none'},paint:{'fill-extrusion-color':'#ffffff','fill-extrusion-height':['get','visual_height'],'fill-extrusion-base':0,'fill-extrusion-opacity':1,'fill-extrusion-vertical-gradient':true,'fill-extrusion-height-transition':{duration:0,delay:0},'fill-extrusion-opacity-transition':{duration:0,delay:0}}});
+ const circ=(r,n=120)=>{const [lng,lat]=DEMO_CENTER,o=[];for(let i=0;i<=n;i++){const a=i/n*Math.PI*2;o.push([lng+r*Math.cos(a)/(111320*Math.cos(lat*Math.PI/180)),lat+r*Math.sin(a)/111320])}return o};
+ const rev=a=>[...a].reverse(),WORLD=[[-179,-85],[179,-85],[179,85],[-179,85],[-179,-85]];
+ map.addSource('sea-mask',{type:'geojson',data:{type:'Feature',geometry:{type:'Polygon',coordinates:[WORLD,rev(circ(RADIUS))]}}});
+ map.addLayer({id:'sea-mask',type:'fill',source:'sea-mask',paint:{'fill-color':'#1E9CF2'}},'tile-outline');
+ map.addSource('island-wall',{type:'geojson',data:{type:'Feature',geometry:{type:'Polygon',coordinates:[circ(RADIUS+16),rev(circ(RADIUS))]}}});
+ map.addSource('island-foam',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:circ(RADIUS+22)}}});
+ map.addLayer({id:'island-foam',type:'line',source:'island-foam',paint:{'line-color':'#FFFFFF','line-width':16,'line-blur':9,'line-opacity':.75}},'tile-outline');
+ map.addLayer({id:'island-wall',type:'fill-extrusion',source:'island-wall',paint:{'fill-extrusion-color':'#C8884A','fill-extrusion-height':9,'fill-extrusion-base':0,'fill-extrusion-vertical-gradient':true}},FULL_LAYER);
+ {const [lng,lat]=DEMO_CENTER,dl=2300/111320,dg=2300/(111320*Math.cos(lat*Math.PI/180));map.setMaxBounds([[lng-dg,lat-dl],[lng+dg,lat+dl]]);map.setMinZoom(14.2)}
  map.addLayer({id:'toy-outline',type:'line',source:FULL,minzoom:15.5,paint:{'line-color':'#3B1E78','line-opacity':.4,'line-width':1.3}},FULL_LAYER);
  setArea(DEMO_CENTER);setMix(curMix);renderLegend();
  map.jumpTo({pitch:24,zoom:15.9,bearing:-85});map.easeTo({center:DEMO_CENTER,zoom:16.9,bearing:-27,pitch:58,duration:2800,easing:t=>1-Math.pow(1-t,3)});
@@ -1021,7 +1069,7 @@ function categoryClass(id){return categoryOf(id)}
 function navBar(active){return ``;}
 function renderBuilding(){const id=selectedId;if(!id)return '';
  const name=kindName(id),category=categoryOf(id),own=ownerFor(id),t=trendFor(id),price=currentValue(id),seed=parseInt(hashStable(id),36)%1000,frequency=knownKind(id)==='aquarium'?4286:220+seed%850,dwell=knownKind(id)==='aquarium'?132:40+seed%195;
- const header=`<div class="sheet-heading building-header"><span class="building-marker" style="background:${CATEGORIES[category].color}"></span><div class="headcopy"><h2>${escapeHTML(name)}</h2><div class="muted">${escapeHTML(CATEGORIES[category].name)}</div></div></div>`;
+ const header=`<div class="sheet-heading building-header"><span class="building-marker" style="background:${CATEGORIES[category].color}"></span><div class="headcopy"><h2>${escapeHTML(name)}</h2><div class="muted">${escapeHTML(CATEGORIES[category].name)}</div>${'<span class="stars">'+'★'.repeat(knownKind(id)?(['aquarium','cathedrale','toursaintnicolas'].includes(knownKind(id))?3:2):1)+'</span>'}</div></div>`;
  const value=`<div class="elevated urbz-value"><div class="price-row"><div><div class="price-label">Valeur actuelle</div><div class="price">${money(price)}</div></div><div class="${t.positive?'positive':'negative'}">${t.positive?'▲':'▼'} ${t.text}</div></div></div>`;
  const chart=`<div class="urbz-evolution-head"><span>Évolution de la valeur</span><span class="material-symbols-rounded" id="evolutionChevron">expand_more</span></div>`;
  const details=`<div class="urbz-evolution-details" id="evolutionDetails"><div class="urbz-evolution-inner">${chartSVG(id)}<div class="statgrid"><div class="elevated stat"><span class="material-symbols-rounded">groups</span><div class="big">${frequency.toLocaleString('fr-FR')}</div><p>Fréquentation · 24 h</p></div><div class="elevated stat"><span class="material-symbols-rounded">schedule</span><div class="big">${Math.floor(dwell/60)} h ${String(dwell%60).padStart(2,'0')}</div><p>Occupation moyenne</p></div></div></div></div>`;
@@ -1270,8 +1318,8 @@ $('openProfile').onclick=()=>navigate('profile');
 $('openRanking').onclick=()=>navigate('ranking');
 $('toggleMarketView').onclick=toggleMarketView;$('openWallet').onclick=()=>navigate('wallet');
 [['openMarket','Marché'],['openWallet','Mes biens'],['openRanking','Classement'],['toggleMarketView','Valeurs']].forEach(([id,t])=>{const b=$(id);if(b){const l=document.createElement('span');l.className='lbl';l.textContent=t;b.appendChild(l)}});
-{const hud=document.querySelector('.top-title');hud.removeAttribute('aria-hidden');hud.innerHTML='<div class="pill-hud"><i class="coin">ε</i><b id="hudBal"></b></div><small id="hudNet"></small>';
- const fmt=n=>Math.round(n).toLocaleString('fr-FR');window.refreshHUD=()=>{$('hudBal').textContent=fmt(economy.balance);$('hudNet').textContent='Patrimoine · '+fmt(netWorth())+' ε'};refreshHUD();setInterval(refreshHUD,800)}
+{const hud=document.querySelector('.top-title');hud.removeAttribute('aria-hidden');hud.innerHTML='<div class="pill-hud"><i class="coin">ε</i><b id="hudBal"></b></div><div class="xp"><em id="hudLv"></em><span><u id="hudXp"></u></span></div><small id="hudNet"></small>';
+ const fmt=n=>Math.round(n).toLocaleString('fr-FR');window.refreshHUD=()=>{const nw=netWorth();$('hudBal').textContent=fmt(economy.balance);$('hudNet').textContent='Patrimoine · '+fmt(nw)+' ε';$('hudLv').textContent='NIV '+(1+Math.floor(nw/10000));$('hudXp').style.width=(nw%10000)/100+'%';refreshMarkers()};refreshHUD();setInterval(refreshHUD,800)}
 $('openMarket').onclick=()=>navigate('market');
 $('openSearch').onclick=()=>{
  searchTerm='';
